@@ -5,7 +5,7 @@ const User = require('../models/User');
 // Register User
 const registerUser = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
+        const { fullName, restaurantName, phone, email, password } = req.body;
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
@@ -18,7 +18,7 @@ const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create new user
-        const newUser = new User({ username, email, password: hashedPassword });
+        const newUser = new User({ fullName, restaurantName, phone, email, password: hashedPassword });
         await newUser.save();
 
         res.status(201).json({ message: 'User registered successfully' });
@@ -30,10 +30,10 @@ const registerUser = async (req, res) => {
 // Login User
 const loginUser = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { email, password } = req.body;
 
         // Find user
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ email });
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -45,7 +45,7 @@ const loginUser = async (req, res) => {
         }
 
         // Sign JWT token
-        const token = jwt.sign({ id: user._id, username: user.username }, "bX!-DK<B*;6MmRhj'k}:Y[", {
+        const token = jwt.sign({ id: user._id, fullName: user.fullName }, "bX!-DK<B*;6MmRhj'k}:Y[", {
             expiresIn: '1h',
         });
 
