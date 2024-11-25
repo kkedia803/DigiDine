@@ -1,21 +1,32 @@
 import React, { useState } from 'react'
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AuthRegister = () => {
-    const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [restaurantName, setRestaurantName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
+        fullName: '',
+        restaurantName: '',
+        phone: '',
+        email: '',
+        password: ''
+    });
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [loading, setLoading] = useState(false);
 
-    const handleRegister = async (e) => {
-        e.prevenDefault();
+    const handleInputChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+        setError('');
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         setLoading(true);
-        setError();
-        setSuccess();
+        setError('');
+        setSuccess('');
 
         try {
             const response = await fetch('http://localhost:5000/api/auth/register', {
@@ -23,29 +34,27 @@ const AuthRegister = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, restaurantName, phone, email, password }),
+                body: JSON.stringify(formData),
             });
+
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Registration Failed');
+                throw new Error(data.message || 'Registration failed');
             }
 
-            setSuccess('Registration Successfull');
-            // clear form 
-            setName('');
-            setRestaurantName('');
-            setPhone('');
-            setEmail('');
-            setPassword('');
-        }
-        catch (err) {
+            setSuccess('Registration successful! Redirecting to login...');
+            setTimeout(() => {
+                navigate('/sign-in');
+            }, 2000);
+
+        } catch (err) {
             setError(err.message);
-        }
-        finally {
+        } finally {
             setLoading(false);
         }
-    }
+    };
+
     return (
         <div className='max-w-sm mx-auto'>
             <div className="mt-7 bg-white border border-gray-200 rounded-xl shadow-sm">
@@ -71,7 +80,7 @@ const AuthRegister = () => {
                         </button>
                         <div className="py-3 flex items-center text-xs text-gray-400 uppercase before:flex-1 before:border-t before:border-gray-200 before:me-6 after:flex-1 after:border-t after:border-gray-200 after:ms-6">Or</div>
                         {/* Form */}
-                        <form onSubmit={handleRegister}>
+                        <form onSubmit={handleSubmit}>
                             <div className="grid gap-y-4">
                                 {/* Form Group */}
                                 <div>
@@ -79,10 +88,10 @@ const AuthRegister = () => {
                                     <div className="relative">
                                         <input
                                             type="text"
-                                            id="name"
-                                            name="name"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
+                                            id="fullName"
+                                            name="fullName"
+                                            value={formData.fullName}
+                                            onChange={handleInputChange}
                                             required
                                             className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="email-error" />
                                         <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
@@ -100,8 +109,8 @@ const AuthRegister = () => {
                                             type="text"
                                             id="restaurantName"
                                             name="restaurantName"
-                                            value={restaurantName}
-                                            onChange={(e) => setRestaurantName(e.target.value)}
+                                            value={formData.restaurantName}
+                                            onChange={handleInputChange}
                                             required
                                             className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="email-error" />
                                         <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
@@ -116,11 +125,11 @@ const AuthRegister = () => {
                                     <label htmlFor="phone" className="block text-sm mb-2">Phone</label>
                                     <div className="relative">
                                         <input
-                                            type="phone"
+                                            type="tel"
                                             id="phone"
                                             name="phone"
-                                            value={phone}
-                                            onChange={(e) => setPhone(e.target.value)}
+                                            value={formData.phone}
+                                            onChange={handleInputChange}
                                             required
                                             className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="email-error" />
                                         <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
@@ -138,8 +147,8 @@ const AuthRegister = () => {
                                             type="email"
                                             id="email"
                                             name="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
+                                            value={formData.email}
+                                            onChange={handleInputChange}
                                             required
                                             className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="email-error" />
                                         <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
@@ -153,14 +162,14 @@ const AuthRegister = () => {
                                 {/* End Form Group */}
                                 {/* Form Group */}
                                 <div>
-                                    <label htmlFor="password" className="block text-sm mb-2">Password</label>
+                                    <label htmlFor="password" className="block text-sm mb-2">Choose Password</label>
                                     <div className="relative">
                                         <input
                                             type="password"
                                             id="password"
                                             name="password"
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
+                                            value={formData.password}
+                                            onChange={handleInputChange}
                                             required
                                             className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="password-error" />
                                         <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
@@ -173,10 +182,14 @@ const AuthRegister = () => {
                                 </div>
                                 {/* End Form Group */}
                                 {/* Form Group */}
-                                <div>
+                                {/* <div>
                                     <label htmlFor="confirm-password" className="block text-sm mb-2">Confirm Password</label>
                                     <div className="relative">
-                                        <input type="password" id="confirm-password" name="confirm-password" className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" required aria-describedby="confirm-password-error" />
+                                        <input
+                                            type="password"
+                                            id="confirm-password"
+                                            name="confirm-password"
+                                            className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" required aria-describedby="confirm-password-error" />
                                         <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
                                             <svg className="size-5 text-red-500" width={16} height={16} fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                                                 <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8 4a.905.905 0 0 0-.9.995l.35 3.507a.552.552 0 0 0 1.1 0l.35-3.507A.905.905 0 0 0 8 4zm.002 6a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" />
@@ -184,7 +197,7 @@ const AuthRegister = () => {
                                         </div>
                                     </div>
                                     <p className="hidden text-xs text-red-600 mt-2" id="confirm-password-error">Password does not match the password</p>
-                                </div>
+                                </div> */}
 
                                 {/* Error */}
                                 {error && (

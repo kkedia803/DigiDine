@@ -1,16 +1,30 @@
 import React, { useState } from 'react'
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AuthLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const handleLogin = async (e) => {
+  const navigate = useNavigate();
+
+  const handleInputChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+    setError('');
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess('');
 
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
@@ -18,24 +32,27 @@ const AuthLogin = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Login Failed');
+        throw new Error(data.message || 'Login failed');
       }
 
       localStorage.setItem('token', data.token);
-    }
-    catch (err) {
+      setSuccess('Login successful! Redirecting...');
+      // Add your navigation logic here
+      // e.g., 
+      navigate('/');
+
+    } catch (err) {
       setError(err.message);
-    }
-    finally {
+    } finally {
       setLoading(false);
     }
-  }
+  };
 
   return (
     <div className='max-w-sm mx-auto'>
@@ -62,7 +79,7 @@ const AuthLogin = () => {
               Sign in with Google
             </button>
             <div className="py-3 flex items-center text-xs text-gray-400 uppercase before:flex-1 before:border-t before:border-gray-200 before:me-6 after:flex-1 after:border-t after:border-gray-200 after:ms-6">Or</div>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleSubmit}>
               <div className="grid gap-y-4">
                 <div>
                   <label htmlFor="email" className="block text-sm mb-2">Email address</label>
@@ -71,8 +88,8 @@ const AuthLogin = () => {
                       type="email"
                       id="email"
                       name="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      value={formData.email}
+                      onChange={handleInputChange}
                       required
                       className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" aria-describedby="email-error" />
                     <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
@@ -92,8 +109,8 @@ const AuthLogin = () => {
                       type="password"
                       id="password"
                       name="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      value={formData.password}
+                      onChange={handleInputChange}
                       className="py-3 px-4 block w-full border-gray-200 border rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none" required aria-describedby="password-error" />
                     <div className="hidden absolute inset-y-0 end-0 pointer-events-none pe-3">
                       <svg className="size-5 text-red-500" width={16} height={16} fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
