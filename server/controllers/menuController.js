@@ -5,8 +5,9 @@ const createMenu = async (req, res) => {
         const { categories } = req.body;
 
         const menu = new Menu({
+            // make useId to be userId in testing otherwise make it default user.Id
             userId: req.user.Id,
-            categories
+            categories,
         });
 
         await menu.save();

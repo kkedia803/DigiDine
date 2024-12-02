@@ -9,12 +9,13 @@ const itemSchema = new mongoose.Schema({
 });
 
 const categorySchema = new mongoose.Schema({
-    name:{type: String, required: true},
-    items:[itemSchema]
+    name: { type: String, required: true },
+    items: [itemSchema]
 });
 
 const menuSchema = new mongoose.Schema({
-    userId: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+    // required to be false when use otherwise make it default true
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     categories: [categorySchema]
 });
 
